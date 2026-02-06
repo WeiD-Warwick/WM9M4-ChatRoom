@@ -102,10 +102,13 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
+      <AdditionalIncludeDirectories>$(SolutionDir)Common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -124,6 +127,24 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Client.cpp" />
+    <ClCompile Include="ThirdParty\imgui.cpp" />
+    <ClCompile Include="ThirdParty\imgui_demo.cpp" />
+    <ClCompile Include="ThirdParty\imgui_draw.cpp" />
+    <ClCompile Include="ThirdParty\imgui_impl_dx12.cpp" />
+    <ClCompile Include="ThirdParty\imgui_impl_win32.cpp" />
+    <ClCompile Include="ThirdParty\imgui_tables.cpp" />
+    <ClCompile Include="ThirdParty\imgui_widgets.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ClientSession.h" />
+    <ClInclude Include="ThirdParty\imconfig.h" />
+    <ClInclude Include="ThirdParty\imgui.h" />
+    <ClInclude Include="ThirdParty\imgui_impl_dx12.h" />
+    <ClInclude Include="ThirdParty\imgui_impl_win32.h" />
+    <ClInclude Include="ThirdParty\imgui_internal.h" />
+    <ClInclude Include="ThirdParty\imstb_rectpack.h" />
+    <ClInclude Include="ThirdParty\imstb_textedit.h" />
+    <ClInclude Include="ThirdParty\imstb_truetype.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
