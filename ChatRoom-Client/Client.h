@@ -143,11 +143,18 @@ public:
     std::vector<Chatter> getCurrentOnlineUser() {
         std::vector<Chatter> result;
         result.reserve(_idToName.size());
-
+        std::lock_guard<std::mutex> lock(_stateMu);
         for (const auto& [id, name] : _idToName) {
             result.emplace_back(id, name);
         }
         return result;
+    }
+
+    void processIncoming(ChatModel& model) {
+        Message msg;
+        while (_incomingQueue.try_pop(msg)) {
+            handleIncoming(msg, model);
+        }
     }
 
 private:
@@ -156,7 +163,7 @@ private:
         while (_running.load() && _queue.wait_pop(event)) {
             switch (event.type) {
             case ClientEvent::Type::IncomingMsg:
-                handleIncoming(event.msg);
+                _incomingQueue.push(event.msg);
                 break;
             case ClientEvent::Type::Disconnected:
                 Log("[Client] Disconnected from server.");
@@ -172,7 +179,7 @@ private:
         }
     }
 
-    void handleIncoming(const Message& msg) {
+    void handleIncoming(const Message& msg, ChatModel& model) {
         switch (msg.type) {
         case MessageType::Welcome: {
             WelcomeMsg welcome = WelcomeMsg::decode(msg.body);
@@ -185,16 +192,43 @@ private:
                     _idToName[user.chatterID] = user.chatterName;
                 }
             }
+            model.me = welcome.me;
             Log(std::format("[Client] Welcome. ID: {}, Synced {} users.", welcome.me.chatterID, welcome.allUsers.size()));
             break;
         }
         case MessageType::ChatGroup: {
             GroupChat gc = GroupChat::decode(msg.body);
+            ChatMsg chatMsg;
+            chatMsg.fromMe = (gc.sender.chatterID == model.me.chatterID);
+            chatMsg.text = gc.content;
+            chatMsg.sender = gc.sender;
+            model.mainChatMessages.push_back(std::move(chatMsg));
             Log(std::format("[Client] Group message received. from={}({}). content={}", gc.sender.chatterName, gc.sender.chatterID, gc.content));
             break;
         }
         case MessageType::ChatPrivate: {
             PrivateChat pc = PrivateChat::decode(msg.body);
+            const bool fromMe = (pc.sender.chatterID == model.me.chatterID);
+            const Chatter& otherUser = fromMe ? pc.receiver : pc.sender;
+            PrivateChatWindow* targetWindow = nullptr;
+            for (auto& window : model.privateChats) {
+                if (window.user.chatterID == otherUser.chatterID) {
+                    window.open = true;
+                    targetWindow = &window;
+                    break;
+                }
+            }
+            if (!targetWindow) {
+                PrivateChatWindow window{};
+                window.user = otherUser;
+                model.privateChats.push_back(std::move(window));
+                targetWindow = &model.privateChats.back();
+            }
+            ChatMsg chatMsg;
+            chatMsg.fromMe = fromMe;
+            chatMsg.text = pc.content;
+            chatMsg.sender = pc.sender;
+            targetWindow->messages.push_back(std::move(chatMsg));
             Log(std::format("[Client] Private message received. from={}({}) to={}({}). content={}", pc.sender.chatterName, pc.sender.chatterID, pc.receiver.chatterName, pc.receiver.chatterID, pc.content));
             break;
         }
@@ -218,6 +252,11 @@ private:
         }
         case MessageType::SystemMessage: {
             SystemMessage systemMessage = SystemMessage::decode(msg.body);
+            ChatMsg chatMsg;
+            chatMsg.fromMe = false;
+            chatMsg.text = systemMessage.text;
+            chatMsg.sender = systemMessage.user;
+            model.mainChatMessages.push_back(std::move(chatMsg));
             Log(std::format("[Client] System message received. text={}", systemMessage.text));
             break;
         }
@@ -242,6 +281,7 @@ private:
     std::atomic<bool> _running{ false };
     std::thread _eventThread;
     std::unique_ptr<ClientSession> _session;
+    ThreadSafeQueue<Message> _incomingQueue;
 
     std::mutex _stateMu;
     std::unordered_map<std::string, std::string> _idToName;

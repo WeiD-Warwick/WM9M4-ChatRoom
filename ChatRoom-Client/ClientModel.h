@@ -48,7 +48,7 @@ public:
     std::string nameBuffer;
     std::string inputBuffer;
     LoginType state = LoginType::Default;
-    std::string uid;
+    Chatter me;
 
 
     bool openLogin = false;

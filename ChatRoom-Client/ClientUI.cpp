@@ -115,7 +115,7 @@ inline void drawOnlineList(Client& client, ChatModel& model) {
             if (ImGui::BeginTable("UserListTable", 1, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings)) {
                 const auto users = client.getCurrentOnlineUser();
                 for (const auto& user : users) {
-                    if (user.chatterID == model.uid) continue;
+                    if (user.chatterID == model.me.chatterID) continue;
                     std::string label = user.chatterName;
                     ImGui::TableNextColumn();
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 6.0f));
@@ -177,7 +177,6 @@ inline void drawInputArea(Client& client, ChatModel& model, float sendBtnW) {
     if (send) {
         if (!model.inputBuffer.empty()) {
             client.sendGroupMessage(model.inputBuffer);
-            model.mainChatMessages.push_back({ true, model.inputBuffer });
             model.inputBuffer.clear();
         }
         ImGui::SetKeyboardFocusHere(-1);
@@ -211,7 +210,6 @@ inline void drawPrivateInputArea(Client& client, PrivateChatWindow& window, floa
     if (send) {
         if (!window.inputBuffer.empty()) {
             client.sendPrivateMessage(window.user.chatterID, window.inputBuffer);
-            window.messages.push_back({ true, window.inputBuffer });
             window.inputBuffer.clear();
         }
         ImGui::SetKeyboardFocusHere(-1);

@@ -23,6 +23,16 @@ public:
         return true;
     }
 
+    bool try_pop(T& out) {
+        std::lock_guard<std::mutex> lk(mu_);
+        if (q_.empty()) {
+            return false;
+        }
+        out = std::move(q_.front());
+        q_.pop();
+        return true;
+    }
+
     void stop() {
         {
             std::lock_guard<std::mutex> lk(mu_);
