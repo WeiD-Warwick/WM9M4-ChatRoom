@@ -1,6 +1,8 @@
 #pragma once
 #include <cstdint>
 #include <string>
+#include <vector>
+#include <unordered_map>
 
 #include "Model.h"
 
@@ -15,7 +17,19 @@ struct ClientEvent {
     int err{};
 };
 
-struct ChatMsg { bool fromMe; std::string text; };
+
+struct ChatMsg { 
+    bool fromMe;
+    std::string text;
+    Chatter sender;
+};
+
+struct PrivateChatWindow {
+    Chatter user;
+    bool open = true;
+    std::string inputBuffer;
+    std::vector<ChatMsg> messages;
+};
 
 class ChatModel {
 public:
@@ -34,19 +48,16 @@ public:
     std::string nameBuffer;
     std::string inputBuffer;
     LoginType state = LoginType::Default;
+    std::string uid;
 
 
     bool openLogin = false;
     bool openMainChat = false;
     bool openPrivateChat = false;
 
-    inline static ChatMsg demoMsgs[] = {
-        { false, "Hello!" },
-        { true,  "Hi, I'm here." },
-        { false, "How are you?" },
-        { true,  "Good. Let's test bubble layout." },
-    };
+    std::vector<PrivateChatWindow> privateChats;
 
+    std::vector<ChatMsg> mainChatMessages;
 
     std::string statusMessage() {
         switch (state) {
@@ -57,6 +68,31 @@ public:
         case LoginType::Disconnected: return "Server Disconnected.";
         case LoginType::EmptyName: return "You Need A NickName";
         default: return "";
+        }
+    }
+
+    void openPrivateChatFor(const Chatter& user) {
+        for (auto& chat : privateChats) {
+            if (chat.user.chatterID == user.chatterID) {
+                chat.open = true;
+                chat.inputBuffer.clear();
+                chat.messages.clear();
+                return;
+            }
+        }
+        PrivateChatWindow window{};
+        window.user = user;
+        privateChats.push_back(std::move(window));
+    }
+
+    void removeClosedPrivateChats() {
+        for (size_t i = 0; i < privateChats.size(); ) {
+            if (!privateChats[i].open) {
+                privateChats.erase(privateChats.begin() + static_cast<long long>(i));
+            }
+            else {
+                ++i;
+            }
         }
     }
 };

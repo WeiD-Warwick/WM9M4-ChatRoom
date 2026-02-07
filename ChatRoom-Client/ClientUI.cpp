@@ -8,9 +8,11 @@
 #include <tchar.h>
 
 void drawOnlineList(Client& client, ChatModel& model);
-void drawMessageList(Client& client, ChatModel& model, float height);
+void drawMessageList(std::vector<ChatMsg>& messages, float height);
 void drawInputArea(Client& client, ChatModel& model, float sendBtnW);
 void drawChatView(Client& client, ChatModel& model);
+void drawPrivateChatWindow(Client& client, ChatModel& model);
+void drawPrivateInputArea(Client& client, PrivateChatWindow& window, float sendBtnW);
 
 inline void drawLoginWindow(Client& client, ChatModel& model) {
 
@@ -49,9 +51,9 @@ inline void drawLoginWindow(Client& client, ChatModel& model) {
 
 inline void drawChatRoomWindow(Client& client, ChatModel& model) {
 
-    //if (!model.isConnected || !client.isRunning()) return;
+    if (!model.isConnected || !client.isRunning()) return;
 
-    //if (!model.openMainChat) return;
+    if (!model.openMainChat) return;
 
     const float sendBtnW = 80.0f;
     const float inputH = ImGui::GetFrameHeight() + ImGui::GetStyle().WindowPadding.y * 2.0f;
@@ -69,7 +71,33 @@ inline void drawChatRoomWindow(Client& client, ChatModel& model) {
 }
 
 inline void drawPrivateChatWindow(Client& client, ChatModel& model) {
+    bool updated = false;
+    for (auto& chat : model.privateChats) {
+        if (!chat.open) {
+            continue;
+        }
+        ImGui::PushID(chat.user.chatterID.c_str());
+        std::string title = "Private Chat - " + chat.user.chatterName;
+        ImGui::SetNextWindowSize(ImVec2(650, 700), ImGuiCond_FirstUseEver);
+        ImGui::Begin(title.c_str(), &chat.open, ImGuiWindowFlags_NoCollapse);
 
+        const float sendBtnW = 80.0f;
+        const float inputH = ImGui::GetFrameHeight() + ImGui::GetStyle().WindowPadding.y * 4.0f;
+        const float listH = ImGui::GetContentRegionAvail().y - inputH - 5;
+
+        drawMessageList(chat.messages, listH);
+        drawPrivateInputArea(client, chat, sendBtnW);
+
+        ImGui::End();
+        ImGui::PopID();
+        if (!chat.open) {
+            updated = true;
+        }
+    }
+
+    if (updated) {
+        model.removeClosedPrivateChats();
+    }
 }
 
 inline void drawOnlineList(Client& client, ChatModel& model) {
@@ -86,12 +114,14 @@ inline void drawOnlineList(Client& client, ChatModel& model) {
             ImGui::BeginChild("UserListScroll", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_Borders);
             if (ImGui::BeginTable("UserListTable", 1, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings)) {
                 const auto users = client.getCurrentOnlineUser();
-                for (int i = 0; i < 5; i++) {
-                    char buf[32];
-                    sprintf_s(buf, "%03d", i);
+                for (const auto& user : users) {
+                    if (user.chatterID == model.uid) continue;
+                    std::string label = user.chatterName;
                     ImGui::TableNextColumn();
                     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 6.0f));
-                    ImGui::Button(buf, ImVec2(-FLT_MIN, 0.0f));
+                    if (ImGui::Button(label.c_str(), ImVec2(-FLT_MIN, 0.0f))) {
+                        model.openPrivateChatFor(user);
+                    }
                     ImGui::PopStyleVar();
                 }
                 ImGui::EndTable();
@@ -105,22 +135,24 @@ inline void drawOnlineList(Client& client, ChatModel& model) {
 }
 
 
-inline void drawMessageList(Client& client, ChatModel& model, float height) {
+inline void drawMessageList(std::vector<ChatMsg>& messages, float height) {
     ImGui::BeginChild("MessageList", ImVec2(0, height), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_Borders);
 
-    for (const auto& m : ChatModel::demoMsgs) {
-        if (m.fromMe) {
+    for (const auto& msg : messages) {
+        std::string info = msg.sender.chatterName + ": " + msg.text;
+        if (msg.fromMe) {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.20f, 0.55f, 0.95f, 1.0f));
-            ImGui::TextUnformatted(m.text.c_str());
+            ImGui::TextUnformatted(info.c_str());
             ImGui::PopStyleColor();
         }
         else {
-            ImGui::TextUnformatted(m.text.c_str());
+            ImGui::TextUnformatted(info.c_str());
         }
     }
 
     ImGui::EndChild();
 }
+
 inline void drawInputArea(Client& client, ChatModel& model, float sendBtnW) {
 
     ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 10.0f));
@@ -144,12 +176,8 @@ inline void drawInputArea(Client& client, ChatModel& model, float sendBtnW) {
 
     if (send) {
         if (!model.inputBuffer.empty()) {
-            // TODO: 接入你的网络发送
-            // client.sendChat(model.inputBuffer);
-
-            // 先演示：你可以把它 push 到 messages（不要改 demoMsgs）
-            // model.messages.push_back({true, model.inputBuffer});
-
+            client.sendGroupMessage(model.inputBuffer);
+            model.mainChatMessages.push_back({ true, model.inputBuffer });
             model.inputBuffer.clear();
         }
         ImGui::SetKeyboardFocusHere(-1);
@@ -159,6 +187,41 @@ inline void drawInputArea(Client& client, ChatModel& model, float sendBtnW) {
     ImGui::PopStyleVar();
 }
 
+inline void drawPrivateInputArea(Client& client, PrivateChatWindow& window, float sendBtnW) {
+    ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(6.0f, 10.0f));
+    ImGui::BeginChild("PrivateInputArea", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_Borders);
+
+    const float spacing = ImGui::GetStyle().ItemSpacing.x;
+    float inputW = ImGui::GetContentRegionAvail().x - sendBtnW - spacing;
+    if (inputW < 50.0f) inputW = 50.0f;
+
+    ImGui::SetNextItemWidth(inputW);
+
+    bool send = false;
+    if (ImGui::InputText("##private_chat_input", &window.inputBuffer, ImGuiInputTextFlags_EnterReturnsTrue)) {
+        send = true;
+    }
+
+    ImGui::SameLine();
+
+    if (ImGui::Button("Send", ImVec2(sendBtnW, 0))) {
+        send = true;
+    }
+
+    if (send) {
+        if (!window.inputBuffer.empty()) {
+            client.sendPrivateMessage(window.user.chatterID, window.inputBuffer);
+            window.messages.push_back({ true, window.inputBuffer });
+            window.inputBuffer.clear();
+        }
+        ImGui::SetKeyboardFocusHere(-1);
+    }
+
+    ImGui::EndChild();
+    ImGui::PopStyleVar();
+}
+
+
 inline void drawChatView(Client& client, ChatModel& model) {
     ImGui::BeginChild("MainChatPanel", ImVec2(0, 0), ImGuiChildFlags_None);
 
@@ -167,7 +230,7 @@ inline void drawChatView(Client& client, ChatModel& model) {
 
     const float listH = ImGui::GetContentRegionAvail().y - inputH - 5;
 
-    drawMessageList(client, model, listH);
+    drawMessageList(model.mainChatMessages, listH);
     drawInputArea(client, model, sendBtnW);
 
     ImGui::EndChild();

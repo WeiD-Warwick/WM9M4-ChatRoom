@@ -117,7 +117,7 @@ FrameContext* WaitForNextFrameContext();
 LRESULT WINAPI WndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
 // Main code
-int mainxxxx(int, char**)
+int main(int, char**)
 {
     // Make process DPI aware and obtain main monitor scale
     ImGui_ImplWin32_EnableDpiAwareness();
@@ -220,9 +220,9 @@ int mainxxxx(int, char**)
 
         //==================================
 
-        //drawLoginWindow(client, model);
+        drawLoginWindow(client, model);
         drawChatRoomWindow(client, model);
-
+        drawPrivateChatWindow(client, model);
         //===================================
 
 
