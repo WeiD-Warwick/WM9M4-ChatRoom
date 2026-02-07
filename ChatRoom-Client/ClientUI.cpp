@@ -85,6 +85,7 @@ inline void drawOnlineList(Client& client, ChatModel& model) {
         {
             ImGui::BeginChild("UserListScroll", ImVec2(0, 0), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_Borders);
             if (ImGui::BeginTable("UserListTable", 1, ImGuiTableFlags_Resizable | ImGuiTableFlags_NoSavedSettings)) {
+                const auto users = client.getCurrentOnlineUser();
                 for (int i = 0; i < 5; i++) {
                     char buf[32];
                     sprintf_s(buf, "%03d", i);
@@ -107,7 +108,6 @@ inline void drawOnlineList(Client& client, ChatModel& model) {
 inline void drawMessageList(Client& client, ChatModel& model, float height) {
     ImGui::BeginChild("MessageList", ImVec2(0, height), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_Borders);
 
-    // 示例：demoMsgs 是 class 内 inline static 或 cpp 定义
     for (const auto& m : ChatModel::demoMsgs) {
         if (m.fromMe) {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.20f, 0.55f, 0.95f, 1.0f));
@@ -118,9 +118,6 @@ inline void drawMessageList(Client& client, ChatModel& model, float height) {
             ImGui::TextUnformatted(m.text.c_str());
         }
     }
-
-    // 可选：始终滚到底（你后面可以改成“有新消息才滚”）
-    // ImGui::SetScrollHereY(1.0f);
 
     ImGui::EndChild();
 }

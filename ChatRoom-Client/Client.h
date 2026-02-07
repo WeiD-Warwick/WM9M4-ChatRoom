@@ -140,6 +140,16 @@ public:
         Log(std::format("[Client] Sent private message to {}.", receiverId));
     }
 
+    std::vector<Chatter> getCurrentOnlineUser() {
+        std::vector<Chatter> result;
+        result.reserve(_idToName.size());
+
+        for (const auto& [id, name] : _idToName) {
+            result.emplace_back(id, name);
+        }
+        return result;
+    }
+
 private:
     void eventLoop() {
         ClientEvent event;
