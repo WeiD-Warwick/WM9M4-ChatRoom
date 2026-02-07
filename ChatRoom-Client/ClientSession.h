@@ -2,6 +2,7 @@
 #include "BaseSession.h"
 #include <atomic>
 #include <thread>
+#include <format>
 #include "ThreadSafeQueue.h"
 #include "ClientModel.h"
 
@@ -19,6 +20,7 @@ public:
     void start() {
         _running.store(true);
         _ioThread = std::thread([this] {
+            Log("[ClientSession] IO thread started.");
             ioLoop();
             });
     }
@@ -26,6 +28,7 @@ public:
     void stop() {
         bool expected = true;
         if (_running.compare_exchange_strong(expected, false)) {
+            Log("[ClientSession] Stopping session.");
             ::shutdown(socket, SD_BOTH);
             ::closesocket(socket);
         }
@@ -57,10 +60,12 @@ private:
                 if (_threadQueue) {
                     ClientEvent event;
                     if (bytes == SOCKET_ERROR) {
+                        Log(std::format("[ClientSession] Socket recv error: {}", WSAGetLastError()));
                         event.type = ClientEvent::Type::Error;
                         event.err = WSAGetLastError();
                     }
                     else {
+                        Log("[ClientSession] Server closed connection.");
                         event.type = ClientEvent::Type::Disconnected;
                     }
                     _threadQueue->push(std::move(event));

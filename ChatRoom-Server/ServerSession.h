@@ -4,6 +4,7 @@
 #include "ServerModel.h"
 #include <atomic>
 #include <thread>
+#include <format>
 #include <optional>
 
 class ServerSession : public BaseSession {
@@ -27,7 +28,7 @@ public:
         _running.store(true);
 
         _ioThread = std::thread([this] { 
-            Log(std::format("{:<{}} threadid: {}. sid: {} start a new io thread.", "[IO Thread]", GetCurrentThreadId(), _sessionID));
+            Log(std::format("{:<{}} threadid: {}. sid: {} start a new io thread.", "[IO Thread]", tag_w, GetCurrentThreadId(), _sessionID));
             ioLoop();
             }
         );
@@ -36,6 +37,7 @@ public:
     void stop() {
         bool expected = true;
         if (_running.compare_exchange_strong(expected, false)) {
+            Log(std::format("{:<{}} Stopping session. sid: {}.", "[IO Thread]", tag_w, _sessionID));
             ::shutdown(socket, SD_BOTH);
             ::closesocket(socket);
         }
@@ -64,6 +66,12 @@ private:
                 handleData(buf, (size_t)bytes);
             }
             else {
+                if (bytes == SOCKET_ERROR) {
+                    Log(std::format("{:<{}} Socket recv error. sid: {} err: {}.", "[IO Thread]", tag_w, _sessionID, WSAGetLastError()));
+                }
+                else {
+                    Log(std::format("{:<{}} Client closed connection. sid: {}.", "[IO Thread]", tag_w, _sessionID));
+                }
                 break;
             }
         }

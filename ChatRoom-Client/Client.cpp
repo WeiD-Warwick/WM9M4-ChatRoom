@@ -5,6 +5,7 @@
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #include <atomic>
+#include <format>
 #include <iostream>
 #include <mutex>
 #include <optional>
@@ -53,20 +54,17 @@ namespace {
                 state.self = me;
                 state.idToName[me.chatterID] = me.chatterName;
             }
-            std::cout << "[System] Welcome " << me.chatterName << " (id=" << me.chatterID << ")\n";
+            Log(std::format("[Client] Welcome received. id={} name={}", me.chatterID, me.chatterName));
             break;
         }
         case MessageType::ChatGroup: {
             GroupChat gc = GroupChat::decode(msg.body);
-            std::cout << "[Group] " << gc.sender.chatterName << " (" << gc.sender.chatterID
-                << "): " << gc.content << "\n";
+            Log(std::format("[Client] Group message received. from={}({})", gc.sender.chatterName, gc.sender.chatterID));
             break;
         }
         case MessageType::ChatPrivate: {
             PrivateChat pc = PrivateChat::decode(msg.body);
-            std::cout << "[Private] " << pc.sender.chatterName << " (" << pc.sender.chatterID
-                << ") -> " << pc.receiver.chatterName << " (" << pc.receiver.chatterID
-                << "): " << pc.content << "\n";
+            Log(std::format("[Client] Private message received. from={}({}) to={}({})", pc.sender.chatterName, pc.sender.chatterID, pc.receiver.chatterName, pc.receiver.chatterID));
             break;
         }
         case MessageType::UserJoin: {
@@ -75,8 +73,7 @@ namespace {
                 std::lock_guard<std::mutex> lock(state.mu);
                 state.idToName[join.user.chatterID] = join.user.chatterName;
             }
-            std::cout << "[System] " << join.user.chatterName << " (" << join.user.chatterID << ")"
-                << join.text << "\n";
+            Log(std::format("[Client] User joined. id={} name={}", join.user.chatterID, join.user.chatterName));
             break;
         }
         case MessageType::UserLeave: {
@@ -85,17 +82,16 @@ namespace {
                 std::lock_guard<std::mutex> lock(state.mu);
                 state.idToName.erase(leave.user.chatterID);
             }
-            std::cout << "[System] " << leave.user.chatterName << " (" << leave.user.chatterID << ")"
-                << leave.text << "\n";
+            Log(std::format("[Client] User left. id={} name={}", leave.user.chatterID, leave.user.chatterName));
             break;
         }
         case MessageType::SystemMessage: {
             SystemMessage systemMessage = SystemMessage::decode(msg.body);
-            std::cout << "[System] " << systemMessage.text << "\n";
+            Log(std::format("[Client] System message received. text={}", systemMessage.text));
             break;
         }
         default:
-            std::cout << "[System] Unsupported message type: " << static_cast<int>(msg.type) << "\n";
+            Log(std::format("[Client] Unsupported message type received: {}", static_cast<int>(msg.type)));
             break;
         }
     }
@@ -111,6 +107,7 @@ int main(int argc, char** argv) {
         port = std::stoi(argv[2]);
     }
 
+    Log(std::format("[Client] Starting. target={}:{}", host, port));
     std::cout << "Enter your name: ";
     std::string name;
     std::getline(std::cin, name);
@@ -121,13 +118,13 @@ int main(int argc, char** argv) {
 
     WSADATA wsaData;
     if (WSAStartup(MAKEWORD(2, 2), &wsaData) != 0) {
-        std::cout << "WSAStartup failed.\n";
+        Log("[Client] WSAStartup failed.");
         return 1;
     }
 
     SOCKET sock = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sock == INVALID_SOCKET) {
-        std::cout << "Socket creation failed.\n";
+        Log("[Client] Socket creation failed.");
         WSACleanup();
         return 1;
     }
@@ -136,25 +133,28 @@ int main(int argc, char** argv) {
     serverAddr.sin_family = AF_INET;
     serverAddr.sin_port = htons(static_cast<u_short>(port));
     if (inet_pton(AF_INET, host.c_str(), &serverAddr.sin_addr) <= 0) {
-        std::cout << "Invalid server address.\n";
+        Log(std::format("[Client] Invalid server address: {}", host));
         ::closesocket(sock);
         WSACleanup();
         return 1;
     }
 
     if (::connect(sock, reinterpret_cast<sockaddr*>(&serverAddr), sizeof(serverAddr)) == SOCKET_ERROR) {
-        std::cout << "Connect failed.\n";
+        Log(std::format("[Client] Connect failed. target={}:{}", host, port));
         ::closesocket(sock);
         WSACleanup();
         return 1;
     }
 
+    Log(std::format("[Client] Connected. target={}:{}", host, port));
     ThreadSafeQueue<ClientEvent> queue;
     ClientSession session(sock, &queue);
     session.start();
 
     Message hello{ MessageType::Hello, HelloMsg{ name }.encode() };
     session.sendMessage(hello);
+
+    Log(std::format("[Client] Sent hello. name={}", name));
 
     ClientState state;
     std::atomic<bool> running{ true };
@@ -167,11 +167,11 @@ int main(int argc, char** argv) {
                 handleIncoming(event.msg, state);
                 break;
             case ClientEvent::Type::Disconnected:
-                std::cout << "[System] Disconnected from server.\n";
+                Log("[Client] Disconnected from server.");
                 running.store(false);
                 break;
             case ClientEvent::Type::Error:
-                std::cout << "[System] Socket error: " << event.err << "\n";
+                Log(std::format("[Client] Socket error: {}", event.err));
                 running.store(false);
                 break;
             default:
@@ -219,12 +219,14 @@ int main(int argc, char** argv) {
             PrivateChat pc{ Chatter("", ""), receiver, content };
             Message msg{ MessageType::ChatPrivate, pc.encode() };
             session.sendMessage(msg);
+            Log(std::format("[Client] Sent private message to {}.", id));
             continue;
         }
 
         GroupChat gc{ Chatter("", ""), line };
         Message msg{ MessageType::ChatGroup, gc.encode() };
         session.sendMessage(msg);
+        Log("[Client] Sent group message.");
     }
 
     queue.stop();

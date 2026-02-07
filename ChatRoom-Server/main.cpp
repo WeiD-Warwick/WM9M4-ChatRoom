@@ -4,7 +4,7 @@
 int main() {
     Server server(65432);
     if (!server.start()) {
-        std::cout << "Server start failed.\n";
+        Log(std::format("{:<{}} Server start failed.", "[Main Thread]", tag_w));
         return 1;
     }
 

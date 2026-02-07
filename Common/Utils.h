@@ -12,6 +12,7 @@
 #pragma comment(lib, "ws2_32.lib")
 
 const int uid_length = 11;
+const int tag_w = 16;
 
 inline std::string generateUID(int length = uid_length) {
     static constexpr char table[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
