@@ -17,6 +17,7 @@
 class Server {
 public:
     Server(int port) : _port(port) {}
+    ~Server() { stop(); }
 
     bool start() {
         WSADATA wsaData;
@@ -49,10 +50,10 @@ public:
         _running.store(true);
 
         // Accept Thread : accept new connection + create new session + post connection event
-        _acceptThread = std::thread([this] { acceptLoop(); });
+        _acceptThread = std::jthread([this](std::stop_token) { acceptLoop(); });
 
         // Event Thread : loop events + handle evnets 
-        _eventThread = std::thread([this] { eventLoop(); });
+        _eventThread = std::jthread([this](std::stop_token) { eventLoop(); });
 
         Log(std::format("{:<{}} Server started on port:{}.", "[Main Thread]", tag_w, _port));
         return true;
@@ -247,8 +248,8 @@ private:
     ThreadSafeQueue<ServerEvent> _queue;
     std::atomic<bool> _running{ false };
 
-    std::thread _acceptThread;
-    std::thread _eventThread;
+    std::jthread _acceptThread;
+    std::jthread _eventThread;
 
     std::atomic<SessionId> _nextSid{ 1 };
 

@@ -33,6 +33,10 @@ public:
         player.init();
     }
 
+    ~Client() {
+        stop();
+    }
+
     bool start(const std::string& userName) {
         Log(std::format("{:<{}} Starting. target={}:{}", "[Main Thread]", tag_w, _host, _port));
 
@@ -80,7 +84,7 @@ public:
         Log(std::format("{:<{}} Sent HELLO. name={}", "[Main Thread]", tag_w, userName));
 
         _running.store(true);
-        _eventThread = std::thread([this] { eventLoop(); });
+        _eventThread = std::jthread([this](std::stop_token) { eventLoop(); });
         return true;
     }
 
@@ -91,7 +95,6 @@ public:
         if (_session) {
             _session->stop();
             _session.reset();
-            _clientSocket = INVALID_SOCKET;
         }
 
         if (_eventThread.joinable()) {
@@ -337,7 +340,7 @@ private:
     SOCKET _clientSocket{ INVALID_SOCKET };
     ThreadSafeQueue<ClientEvent> _queue;
     std::atomic<bool> _running{ false };
-    std::thread _eventThread;
+    std::jthread _eventThread;
     std::unique_ptr<ClientSession> _session;
     ThreadSafeQueue<Message> _incomingQueue;
 

@@ -14,6 +14,9 @@ private:
 public:
     AudioPlayer() {}
 
+    ~AudioPlayer() { stop(); }
+
+
     bool init() {
         FMOD_RESULT result;
 
@@ -44,7 +47,7 @@ public:
         }
     }
 
-    void shutdown() {
+    void stop() {
         if (alertSound) alertSound->release();
         if (joinSound) joinSound->release();
         if (system) {
