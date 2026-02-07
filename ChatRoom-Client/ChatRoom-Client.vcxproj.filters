@@ -17,73 +17,128 @@
     <ClCompile Include="Client.h">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="ThirdParty\imgui.cpp">
+    <ClCompile Include="ThirdParty\IMGUI\imgui.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ThirdParty\imgui_demo.cpp">
+    <ClCompile Include="ThirdParty\IMGUI\imgui_demo.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ThirdParty\imgui_draw.cpp">
+    <ClCompile Include="ThirdParty\IMGUI\imgui_draw.cpp">
       <Filter>imgui</Filter>
     </ClCompile>
-    <ClCompile Include="ThirdParty\imgui_impl_win32.cpp">
+    <ClCompile Include="ThirdParty\IMGUI\imgui_impl_win32.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="ThirdParty\imgui_impl_dx12.cpp">
+    <ClCompile Include="ThirdParty\IMGUI\imgui_impl_dx12.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="ThirdParty\imgui_tables.cpp">
+    <ClCompile Include="ThirdParty\IMGUI\imgui_tables.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="ThirdParty\imgui_widgets.cpp">
+    <ClCompile Include="ThirdParty\IMGUI\imgui_widgets.cpp">
       <Filter>sources</Filter>
     </ClCompile>
     <ClCompile Include="main.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="ImGUIDX12.cpp">
-      <Filter>sources</Filter>
-    </ClCompile>
     <ClCompile Include="ClientUI.cpp">
       <Filter>sources</Filter>
     </ClCompile>
-    <ClCompile Include="ThirdParty\imgui_stdlib.cpp">
+    <ClCompile Include="ThirdParty\IMGUI\imgui_stdlib.cpp">
       <Filter>sources</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="ThirdParty\imconfig.h">
+    <ClInclude Include="ThirdParty\IMGUI\imconfig.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ThirdParty\imgui.h">
+    <ClInclude Include="ThirdParty\IMGUI\imgui.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ThirdParty\imgui_impl_dx12.h">
+    <ClInclude Include="ThirdParty\IMGUI\imgui_impl_dx12.h">
       <Filter>sources</Filter>
     </ClInclude>
     <ClInclude Include="ClientSession.h">
       <Filter>sources</Filter>
     </ClInclude>
-    <ClInclude Include="ThirdParty\imgui_impl_win32.h">
+    <ClInclude Include="ThirdParty\IMGUI\imgui_impl_win32.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ThirdParty\imgui_internal.h">
+    <ClInclude Include="ThirdParty\IMGUI\imgui_internal.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ThirdParty\imstb_rectpack.h">
+    <ClInclude Include="ThirdParty\IMGUI\imstb_rectpack.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ThirdParty\imstb_textedit.h">
+    <ClInclude Include="ThirdParty\IMGUI\imstb_textedit.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ThirdParty\imstb_truetype.h">
+    <ClInclude Include="ThirdParty\IMGUI\imstb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="ClientModel.h">
       <Filter>imgui</Filter>
     </ClInclude>
-    <ClInclude Include="ThirdParty\imgui_stdlib.h">
+    <ClInclude Include="ThirdParty\IMGUI\imgui_stdlib.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod.hpp">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod_codec.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod_common.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod_dsp.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod_dsp_effects.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod_errors.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod_output.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod_studio.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod_studio.hpp">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\FMOD\inc\fmod_studio_common.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="AudioPlayer.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ThirdParty\FMOD\inc\fmod.cs" />
+    <None Include="ThirdParty\FMOD\inc\fmod_dsp.cs" />
+    <None Include="ThirdParty\FMOD\inc\fmod_errors.cs" />
+    <None Include="ThirdParty\FMOD\inc\fmod_studio.cs" />
+    <None Include="ThirdParty\FMOD\lib\fmod.dll" />
+    <None Include="ThirdParty\FMOD\lib\fmodL.dll" />
+    <None Include="ThirdParty\FMOD\lib\fmodstudio.dll" />
+    <None Include="ThirdParty\FMOD\lib\fmodstudioL.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="ThirdParty\FMOD\lib\fmod_vc.lib" />
+    <Library Include="ThirdParty\FMOD\lib\fmodL_vc.lib" />
+    <Library Include="ThirdParty\FMOD\lib\fmodstudio_vc.lib" />
+    <Library Include="ThirdParty\FMOD\lib\fmodstudioL_vc.lib" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="WAV\Alert.wav" />
+    <Media Include="WAV\Login.wav" />
+    <Media Include="audio\Alert.wav" />
+    <Media Include="audio\Join.mp3" />
   </ItemGroup>
 </Project>

@@ -13,6 +13,7 @@
 #include <string>
 #include <thread>
 #include <unordered_map>
+#include "AudioPlayer.h"
 
 namespace {
 
@@ -28,7 +29,9 @@ namespace {
 
 class Client {
 public:
-    Client(std::string host, int port) : _host(std::move(host)), _port(port) {}
+    Client(std::string host, int port) : _host(std::move(host)), _port(port) {
+        player.init();
+    }
 
     bool start(const std::string& userName) {
         Log(std::format("{:<{}} Starting. target={}:{}", "[Main Thread]", tag_w, _host, _port));
@@ -156,6 +159,7 @@ public:
         while (_incomingQueue.try_pop(msg)) {
             handleIncoming(msg, model);
         }
+        player.update();
     }
 
 private:
@@ -205,6 +209,11 @@ private:
             chatMsg.sender = gc.sender;
             chatMsg.type = ChatMsg::Type::Normal;
             model.mainChatMessages.push_back(std::move(chatMsg));
+
+            if (gc.sender.chatterID != _self.chatterID) {
+                player.playAlert();
+            }
+
             Log(std::format("[Client] Group message received. from={}({}). content={}", gc.sender.chatterName, gc.sender.chatterID, gc.content));
             break;
         }
@@ -232,6 +241,11 @@ private:
             chatMsg.sender = pc.sender;
             chatMsg.type = ChatMsg::Type::Normal;
             targetWindow->messages.push_back(std::move(chatMsg));
+
+            if (pc.sender.chatterID != _self.chatterID) {
+                player.playAlert();
+            }
+
             Log(std::format("[Client] Private message received. from={}({}) to={}({}). content={}", pc.sender.chatterName, pc.sender.chatterID, pc.receiver.chatterName, pc.receiver.chatterID, pc.content));
             break;
         }
@@ -248,6 +262,11 @@ private:
             chatMsg.sender = Chatter("default", "System");
             chatMsg.type = ChatMsg::Type::SystemJoin;
             model.mainChatMessages.push_back(std::move(chatMsg));
+
+            if (join.user.chatterID != _self.chatterID) {
+                player.playJoin();
+            }
+
             Log(std::format("[Client] User joined. id={} name={}", join.user.chatterID, join.user.chatterName));
             break;
         }
@@ -303,5 +322,7 @@ private:
     std::mutex _stateMu;
     std::unordered_map<std::string, std::string> _idToName;
     Chatter _self;
+
+    AudioPlayer player;
 
 };

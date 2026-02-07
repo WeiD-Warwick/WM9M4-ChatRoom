@@ -1,8 +1,8 @@
 ﻿#include "Client.h"
-#include "ThirdParty/imgui.h"
-#include "ThirdParty/imgui_impl_win32.h"
-#include "ThirdParty/imgui_impl_dx12.h"
-#include "ThirdParty/imgui_stdlib.h"
+#include "ThirdParty/IMGUI/imgui.h"
+#include "ThirdParty/IMGUI/imgui_impl_win32.h"
+#include "ThirdParty/IMGUI/imgui_impl_dx12.h"
+#include "ThirdParty/IMGUI/imgui_stdlib.h"
 #include <d3d12.h>
 #include <dxgi1_5.h>
 #include <tchar.h>
