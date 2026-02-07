@@ -14,7 +14,7 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Client.cpp">
+    <ClCompile Include="Client.h">
       <Filter>sources</Filter>
     </ClCompile>
     <ClCompile Include="ThirdParty\imgui.cpp">
@@ -36,6 +36,9 @@
       <Filter>sources</Filter>
     </ClCompile>
     <ClCompile Include="ThirdParty\imgui_widgets.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
       <Filter>sources</Filter>
     </ClCompile>
   </ItemGroup>

@@ -28,6 +28,7 @@ public:
         _serverSocket = ::socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
         if (_serverSocket == INVALID_SOCKET) {
             Log(std::format("{:<{}} Socket creation failed.", "[Main Thread]", tag_w));
+            WSACleanup();
             return false;
         }
 

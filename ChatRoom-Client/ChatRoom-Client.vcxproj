@@ -126,7 +126,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="Client.cpp" />
+    <ClCompile Include="Client.h" />
+    <ClCompile Include="main.cpp" />
     <ClCompile Include="ThirdParty\imgui.cpp" />
     <ClCompile Include="ThirdParty\imgui_demo.cpp" />
     <ClCompile Include="ThirdParty\imgui_draw.cpp" />
