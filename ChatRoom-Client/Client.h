@@ -88,6 +88,7 @@ public:
         if (_session) {
             _session->stop();
             _session.reset();
+            _clientSocket = INVALID_SOCKET;
         }
 
         if (_eventThread.joinable()) {

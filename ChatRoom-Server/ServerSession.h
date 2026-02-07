@@ -40,6 +40,7 @@ public:
             Log(std::format("{:<{}} Stopping session. sid: {}.", "[IO Thread]", tag_w, _sessionID));
             ::shutdown(socket, SD_BOTH);
             ::closesocket(socket);
+            socket = INVALID_SOCKET;
         }
 
         if (_ioThread.joinable()) {

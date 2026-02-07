@@ -9,6 +9,9 @@ public:
     void push(T v) {
         {
             std::lock_guard<std::mutex> lk(mu_);
+            if (stop_) {
+                return;
+            }
             q_.push(std::move(v));
         }
         cv_.notify_one();

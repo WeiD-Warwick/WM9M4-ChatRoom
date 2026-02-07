@@ -31,6 +31,7 @@ public:
             Log("[ClientSession] Stopping session.");
             ::shutdown(socket, SD_BOTH);
             ::closesocket(socket);
+            socket = INVALID_SOCKET;
         }
 
         if (_ioThread.joinable()) {
