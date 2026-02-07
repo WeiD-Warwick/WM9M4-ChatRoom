@@ -5,6 +5,7 @@
 #include <variant>
 #include <vector>
 #include <winsock2.h>
+#include <memory>
 
 #include "Utils.h"
 #include <iostream>
@@ -33,6 +34,8 @@ struct Chatter {
 
     Chatter(std::string name) : Chatter(generateUID(), name) {}
 
+    Chatter() {}
+
     std::string encode() const {
         std::vector<char> buf;
         serializeString(buf, chatterID);
@@ -47,6 +50,8 @@ struct Chatter {
         std::string name = deserializeString(buf, offset);
         return Chatter(id, name);
     }
+
+    bool isEmpty() { return chatterID.empty() && chatterName.empty(); }
 };
 
 struct HelloMsg {

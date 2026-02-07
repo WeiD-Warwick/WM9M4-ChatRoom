@@ -44,6 +44,12 @@
     <ClCompile Include="ImGUIDX12.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="ClientUI.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
+    <ClCompile Include="ThirdParty\imgui_stdlib.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imconfig.h">
@@ -74,6 +80,9 @@
       <Filter>imgui</Filter>
     </ClInclude>
     <ClInclude Include="ClientModel.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
+    <ClInclude Include="ThirdParty\imgui_stdlib.h">
       <Filter>imgui</Filter>
     </ClInclude>
   </ItemGroup>

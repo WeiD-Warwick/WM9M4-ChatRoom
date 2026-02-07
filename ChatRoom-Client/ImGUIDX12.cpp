@@ -23,6 +23,7 @@
 #pragma comment(lib, "dxguid.lib")
 #endif
 #include <string>
+#include "ClientUI.cpp"
 
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "dxgi.lib")
@@ -177,12 +178,16 @@ int main(int, char**)
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
     Client client("127.0.0.1", 65432);
+    
+    ChatModel model;
 
-    bool connected = false;
-    std::string status_message;
-    char name_buffer[64] = "";
-    char message_buffer[256] = "";
+    const ImVec2 windowSize(900, 520); // ???????
+    const ImVec2 center(
+        (io.DisplaySize.x - windowSize.x) * 0.5f,
+        (io.DisplaySize.y - windowSize.y) * 0.5f
+    );
 
+    // 
     // Main loop
     bool done = false;
     while (!done)
@@ -215,32 +220,8 @@ int main(int, char**)
 
         //==================================
 
-        if (connected && !client.isRunning()) {
-            connected = false;
-            status_message = "Disconnection";
-        }
-
-        if (!connected) {
-            ImGui::SetNextWindowSize(ImVec2(420, 200), ImGuiCond_FirstUseEver);
-            ImGui::Begin("ChatRoom Login");
-            ImGui::Text("Name");
-            ImGui::InputText("name", name_buffer, IM_ARRAYSIZE(name_buffer));
-            if (ImGui::Button("Go!") && name_buffer[0] != '\0') {
-                connected = client.start(name_buffer);
-                status_message = connected ? "Connect Success!" : "Error! Check Server Status!";
-            }
-            if (!status_message.empty()) {
-                ImGui::Spacing();
-                ImGui::Text("%s", status_message.c_str());
-            }
-            ImGui::End();
-        }
-        else {
-        }
-
-
-
-
+        //drawLoginWindow(client, model);
+        drawChatRoomWindow(client, model);
 
         //===================================
 

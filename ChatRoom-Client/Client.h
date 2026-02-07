@@ -215,8 +215,8 @@ private:
 
     Chatter currentUserOrEmpty() {
         std::lock_guard<std::mutex> lock(_stateMu);
-        if (_self) {
-            return *_self;
+        if (!_self.isEmpty()) {
+            return _self;
         }
         return Chatter("", "");
     }
@@ -231,5 +231,6 @@ private:
 
     std::mutex _stateMu;
     std::unordered_map<std::string, std::string> _idToName;
-    std::optional<Chatter> _self;
+    Chatter _self;
+
 };
