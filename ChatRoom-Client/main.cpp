@@ -1,12 +1,12 @@
 #include "Client.h"
-#include "ImGUIDX12.cpp"
+//#include "ImGUIDX12.cpp"
 
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "dxgi.lib")
 #pragma comment(lib, "d3d12.lib")
 
 
-int main22() {
+int main22ss() {
     std::string host = "127.0.0.1";
     int port = 65432;
 

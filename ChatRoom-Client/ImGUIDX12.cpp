@@ -22,6 +22,10 @@
 #pragma comment(lib, "dxguid.lib")
 #endif
 
+#pragma comment(lib, "ws2_32.lib")
+#pragma comment(lib, "dxgi.lib")
+#pragma comment(lib, "d3d12.lib")
+
 // Config for example app
 static const int APP_NUM_FRAMES_IN_FLIGHT = 2;
 static const int APP_NUM_BACK_BUFFERS = 2;
