@@ -139,6 +139,27 @@ inline void drawMessageList(std::vector<ChatMsg>& messages, float height) {
     ImGui::BeginChild("MessageList", ImVec2(0, height), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_Borders);
 
     for (const auto& msg : messages) {
+        if (msg.type != ChatMsg::Type::Normal) {
+            std::string banner;
+            ImVec4 color = ImVec4(0.85f, 0.85f, 0.85f, 1.0f);
+            if (msg.type == ChatMsg::Type::SystemJoin) {
+                banner = std::format("---------------  {} joined  ------------------", msg.text);
+                color = ImVec4(0.25f, 0.80f, 0.45f, 1.0f);
+            }
+            else if (msg.type == ChatMsg::Type::SystemLeave) {
+                banner = std::format("---------------  {} left  ------------------", msg.text);
+                color = ImVec4(0.90f, 0.25f, 0.25f, 1.0f);
+            }
+            else {
+                banner = std::format("---------------  {}  ------------------", msg.text);
+                color = ImVec4(0.95f, 0.70f, 0.25f, 1.0f);
+            }
+            ImGui::PushStyleColor(ImGuiCol_Text, color);
+            ImGui::TextUnformatted(banner.c_str());
+            ImGui::PopStyleColor();
+            continue;
+        }
+
         std::string info = msg.sender.chatterName + ": " + msg.text;
         if (msg.fromMe) {
             ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.20f, 0.55f, 0.95f, 1.0f));

@@ -19,9 +19,19 @@ struct ClientEvent {
 
 
 struct ChatMsg { 
+
+    enum class Type {
+        Normal,
+        SystemJoin,
+        SystemLeave,
+        SystemNotice
+    };
+
+
     bool fromMe;
     std::string text;
     Chatter sender;
+    Type type = Type::Normal;
 };
 
 struct PrivateChatWindow {

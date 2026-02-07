@@ -202,6 +202,7 @@ private:
             chatMsg.fromMe = (gc.sender.chatterID == model.me.chatterID);
             chatMsg.text = gc.content;
             chatMsg.sender = gc.sender;
+            chatMsg.type = ChatMsg::Type::Normal;
             model.mainChatMessages.push_back(std::move(chatMsg));
             Log(std::format("[Client] Group message received. from={}({}). content={}", gc.sender.chatterName, gc.sender.chatterID, gc.content));
             break;
@@ -228,6 +229,7 @@ private:
             chatMsg.fromMe = fromMe;
             chatMsg.text = pc.content;
             chatMsg.sender = pc.sender;
+            chatMsg.type = ChatMsg::Type::Normal;
             targetWindow->messages.push_back(std::move(chatMsg));
             Log(std::format("[Client] Private message received. from={}({}) to={}({}). content={}", pc.sender.chatterName, pc.sender.chatterID, pc.receiver.chatterName, pc.receiver.chatterID, pc.content));
             break;
@@ -238,6 +240,13 @@ private:
                 std::lock_guard<std::mutex> lock(_stateMu);
                 _idToName[join.user.chatterID] = join.user.chatterName;
             }
+
+            ChatMsg chatMsg;
+            chatMsg.fromMe = false;
+            chatMsg.text = join.user.chatterName;
+            chatMsg.sender = Chatter("default", "System");
+            chatMsg.type = ChatMsg::Type::SystemJoin;
+            model.mainChatMessages.push_back(std::move(chatMsg));
             Log(std::format("[Client] User joined. id={} name={}", join.user.chatterID, join.user.chatterName));
             break;
         }
@@ -247,6 +256,12 @@ private:
                 std::lock_guard<std::mutex> lock(_stateMu);
                 _idToName.erase(leave.user.chatterID);
             }
+            ChatMsg chatMsg;
+            chatMsg.fromMe = false;
+            chatMsg.text = leave.user.chatterName;
+            chatMsg.sender = Chatter("default", "System");
+            chatMsg.type = ChatMsg::Type::SystemLeave;
+            model.mainChatMessages.push_back(std::move(chatMsg));
             Log(std::format("[Client] User left. id={} name={}", leave.user.chatterID, leave.user.chatterName));
             break;
         }
@@ -255,7 +270,8 @@ private:
             ChatMsg chatMsg;
             chatMsg.fromMe = false;
             chatMsg.text = systemMessage.text;
-            chatMsg.sender = systemMessage.user;
+            chatMsg.sender = Chatter("default", "System");
+            chatMsg.type = ChatMsg::Type::SystemNotice;
             model.mainChatMessages.push_back(std::move(chatMsg));
             Log(std::format("[Client] System message received. text={}", systemMessage.text));
             break;

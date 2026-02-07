@@ -209,7 +209,7 @@ private:
             auto itSid = _uidToSid.find(pc.receiver.chatterID);
             if (itSid == _uidToSid.end()) {
                 // offline
-                SystemMessage event { *session->user(), "receiver not online" };
+                SystemMessage event { *session->user(), "Receiver not online" };
                 Message systemMessage { MessageType::SystemMessage, event.encode() };
 
                 // send system message to sender
