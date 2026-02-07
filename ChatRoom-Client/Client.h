@@ -165,13 +165,17 @@ private:
     void handleIncoming(const Message& msg) {
         switch (msg.type) {
         case MessageType::Welcome: {
-            Chatter me = Chatter::decode(msg.body);
+            WelcomeMsg welcome = WelcomeMsg::decode(msg.body);
             {
                 std::lock_guard<std::mutex> lock(_stateMu);
-                _self = me;
-                _idToName[me.chatterID] = me.chatterName;
+                _self = welcome.me;
+                _idToName[welcome.me.chatterID] = welcome.me.chatterName;
+
+                for (const auto& user : welcome.allUsers) {
+                    _idToName[user.chatterID] = user.chatterName;
+                }
             }
-            Log(std::format("[Client] Welcome received. id={} name={}", me.chatterID, me.chatterName));
+            Log(std::format("[Client] Welcome. ID: {}, Synced {} users.", welcome.me.chatterID, welcome.allUsers.size()));
             break;
         }
         case MessageType::ChatGroup: {

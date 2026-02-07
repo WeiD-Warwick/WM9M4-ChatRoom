@@ -70,6 +70,45 @@ struct HelloMsg {
     }
 };
 
+struct WelcomeMsg {
+    Chatter me;
+    std::vector<Chatter> allUsers;
+
+    std::string encode() const {
+        std::vector<char> buf;
+        serializeString(buf, me.encode());
+
+        uint32_t count = static_cast<uint32_t>(allUsers.size());
+        uint32_t netCount = htonl(count);
+        char countBuf[4];
+        std::memcpy(countBuf, &netCount, 4);
+        buf.insert(buf.end(), countBuf, countBuf + 4);
+
+        for (const auto& user : allUsers) {
+            serializeString(buf, user.encode());
+        }
+        return std::string(buf.begin(), buf.end());
+    }
+
+    static WelcomeMsg decode(const std::string& data) {
+        std::vector<char> buf(data.begin(), data.end());
+        size_t offset = 0;
+
+        WelcomeMsg msg;
+        msg.me = Chatter::decode(deserializeString(buf, offset));
+
+        uint32_t netCount = 0;
+        std::memcpy(&netCount, buf.data() + offset, 4);
+        offset += 4;
+        uint32_t count = ntohl(netCount);
+
+        for (uint32_t i = 0; i < count; ++i) {
+            msg.allUsers.push_back(Chatter::decode(deserializeString(buf, offset)));
+        }
+        return msg;
+    }
+};
+
 struct GroupChat {
     Chatter sender;
     std::string content;
@@ -186,6 +225,7 @@ struct SystemMessage {
 
 using BusinessMsg = std::variant<
     HelloMsg,
+    WelcomeMsg,
     Chatter,
     GroupChat,
     PrivateChat,
@@ -225,7 +265,7 @@ struct Message {
     BusinessMsg decode() const {
         switch (type) {
         case MessageType::Hello:       return HelloMsg::decode(body);
-        case MessageType::Welcome:     return Chatter::decode(body);
+        case MessageType::Welcome:     return WelcomeMsg::decode(body);
         case MessageType::ChatGroup:   return GroupChat::decode(body);
         case MessageType::ChatPrivate: return PrivateChat::decode(body);
         case MessageType::UserJoin:    return UserJoin::decode(body);

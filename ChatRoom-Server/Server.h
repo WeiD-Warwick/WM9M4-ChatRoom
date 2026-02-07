@@ -166,10 +166,18 @@ private:
 
             Log(std::format("{:<{}} User login. sid: {} id: {} name: {}.", "[Event Thread]", tag_w, sid, me.chatterID, me.chatterName));
 
-            // Send Welcom to client (attach uid)
-            Message welcome { MessageType::Welcome, me.encode() };
-            session->sendMessage(welcome);
-            // broadcast to group that xxx join 
+            // Send Welcom to client (with current users)
+            WelcomeMsg welcome;
+            welcome.me = me;
+            for (auto& [id, s] : _sessions) {
+                if (s->user() && s->user()->chatterID != me.chatterID) {
+                    welcome.allUsers.push_back(*s->user());
+                }
+            }
+            Message welcomePacket{ MessageType::Welcome, welcome.encode() };
+            session->sendMessage(welcomePacket);
+
+            // broadcast new user
             UserJoin join { me, " joined." };
             Message joinMsg { MessageType::UserJoin, join.encode() };
             

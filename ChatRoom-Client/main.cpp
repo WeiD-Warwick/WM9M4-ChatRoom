@@ -6,7 +6,7 @@
 #pragma comment(lib, "d3d12.lib")
 
 
-int main22ss() {
+int main() {
     std::string host = "127.0.0.1";
     int port = 65432;
 
