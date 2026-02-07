@@ -127,6 +127,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Client.h" />
+    <ClCompile Include="ImGUIDX12.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="ThirdParty\imgui.cpp" />
     <ClCompile Include="ThirdParty\imgui_demo.cpp" />

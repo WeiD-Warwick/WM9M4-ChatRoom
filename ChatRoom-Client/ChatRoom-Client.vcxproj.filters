@@ -41,6 +41,9 @@
     <ClCompile Include="main.cpp">
       <Filter>sources</Filter>
     </ClCompile>
+    <ClCompile Include="ImGUIDX12.cpp">
+      <Filter>sources</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ThirdParty\imconfig.h">
