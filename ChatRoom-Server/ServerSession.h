@@ -25,7 +25,9 @@ public:
 
     void start() {
         _running.store(true);
+
         _ioThread = std::thread([this] { 
+            Log(std::format("{:<{}} threadid: {}. sid: {} start a new io thread.", "[IO Thread]", GetCurrentThreadId(), _sessionID));
             ioLoop();
             }
         );

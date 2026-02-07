@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <thread>
 #include <atomic>
+#include <format>
 
 #include "ServerSession.h"
 #include "ThreadSafeQueue.h"
@@ -40,7 +41,7 @@ public:
         // Event Thread : loop events + handle evnets 
         _eventThread = std::thread([this] { eventLoop(); });
 
-        std::cout << "[Main Thread] Server started on port " << _port << "...\n";
+        Log(std::format("{:<{}} Server started on port: {} .", "[Main Thread]", _port));
         return true;
     }
 
@@ -68,7 +69,6 @@ private:
 
     // accept client connection and create Session
     void acceptLoop() {
-        std::cout << "[Accept Thread] id = " << std::this_thread::get_id() << std::endl;
         while (_running.load()) {
             SOCKET clientSock = ::accept(_serverSocket, nullptr, nullptr);
             if (clientSock == INVALID_SOCKET) continue;
@@ -76,6 +76,8 @@ private:
             SessionId sid = _nextSid++;
 
             auto session = std::make_shared<ServerSession>(sid, clientSock, &_queue);
+
+            Log(std::format("{:<{}} A new client connected success. sid: {}.", "[Accept Thread]", sid));
             // handle recv
             session->start();
 
@@ -86,26 +88,25 @@ private:
             event.session = session;
             _queue.push(std::move(event));
 
-            std::cout << "[Accept Thread] A new client connected success. sid: " << sid << std::endl;
+
         }
     }
 
     void eventLoop() {
-        std::cout << "[Event Thread] id = " << std::this_thread::get_id() << std::endl;
         ServerEvent event;
         while (_running.load() && _queue.wait_pop(event)) {
             switch (event.type) {
             case ServerEvent::Type::Connected:
                 onConnected(event.sessionID, event.session);
-                std::cout << "[Event Thread] New Client Connected. sid=" << event.sessionID << ", totalSession=" << _sessions.size() << std::endl;
+                Log(std::format("{:<{}} New Client Connected. sid: {}, totalSession: {}.", "[Event Thread]", event.sessionID, _sessions.size()));
                 break;
             case ServerEvent::Type::IncomingMsg:
                 onIncoming(event.sessionID, event.msg);
-                std::cout << "[Event Thread] New Message Incoming. sid=" << event.sessionID << ", type: " << std::to_string((int)event.msg.type) << std::endl;
+                Log(std::format("{:<{}} New Message Incoming. sid: {}, type: {}.", "[Event Thread]", event.sessionID, (int)event.msg.type));
                 break;
             case ServerEvent::Type::Disconnected:
                 onDisconnected(event.sessionID);
-                std::cout << "[Event Thread] Client Disconnected. sid: " << event.sessionID << ", remainingSession: " << _sessions.size() << std::endl;
+                Log(std::format("{:<{}} Client Disconnected. sid: {}, remainingSession: {}.", "[Event Thread]", event.sessionID, _sessions.size()));
                 break;
             }
         }

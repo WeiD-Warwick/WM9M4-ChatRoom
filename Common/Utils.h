@@ -5,6 +5,9 @@
 #include <string>
 #include <vector>
 #include <winsock2.h>
+#include <format>
+#include <mutex>
+#include <iostream>
 
 #pragma comment(lib, "ws2_32.lib")
 
@@ -23,7 +26,7 @@ inline std::string generateUID(int length = uid_length) {
         uid.push_back(table[dist(rng)]);
     }
     return uid;
-}
+};
 
 inline void serializeString(std::vector<char>& buf, const std::string& str) {
     uint32_t len = htonl((uint32_t)(str.size()));
@@ -31,7 +34,7 @@ inline void serializeString(std::vector<char>& buf, const std::string& str) {
 
     buf.insert(buf.end(), lenPtr, lenPtr + 4);
     buf.insert(buf.end(), str.begin(), str.end());
-}
+};
 
 inline std::string deserializeString(const std::vector<char>& buf, size_t& offset) {
     if (offset + 4 > buf.size()) return "";
@@ -47,3 +50,9 @@ inline std::string deserializeString(const std::vector<char>& buf, size_t& offse
 
     return str;
 }
+
+inline void Log(const std::string& msg) {
+    static std::mutex m;
+    std::lock_guard<std::mutex> lock(m);
+    std::cout << msg << '\n';
+};

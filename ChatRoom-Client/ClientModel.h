@@ -4,7 +4,7 @@
 
 #include "Model.h"
 
-using ClientEvent = struct {
+struct ClientEvent {
     enum class Type { 
         Connected,
         IncomingMsg,
