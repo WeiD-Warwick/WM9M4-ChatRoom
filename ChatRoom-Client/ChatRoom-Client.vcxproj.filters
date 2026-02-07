@@ -67,5 +67,8 @@
     <ClInclude Include="ThirdParty\imstb_truetype.h">
       <Filter>imgui</Filter>
     </ClInclude>
+    <ClInclude Include="ClientModel.h">
+      <Filter>imgui</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

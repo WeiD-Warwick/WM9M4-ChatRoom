@@ -1,6 +1,6 @@
 #pragma once
 #include <cstdint>
-#include <memory>   // ? for std::shared_ptr
+#include <memory>
 #include <string>
 
 #include "Model.h"

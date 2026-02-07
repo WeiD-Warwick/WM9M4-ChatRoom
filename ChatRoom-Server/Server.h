@@ -82,6 +82,7 @@ private:
             // push session to sessions to consume for eventThread
             ServerEvent event;
             event.type = ServerEvent::Type::Connected;
+            event.sessionID = sid;
             event.session = session;
             _queue.push(std::move(event));
 

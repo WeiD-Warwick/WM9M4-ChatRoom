@@ -55,13 +55,6 @@ private:
     }
 
     void ioLoop() {
-        if (_threadQueue) {
-            ServerEvent event;
-            event.type = ServerEvent::Type::Connected;
-            event.sessionID = _sessionID;
-            _threadQueue->push(std::move(event));
-        }
-
         char buf[4096];
         while (_running.load()) {
             int bytes = ::recv(socket, buf, (int)sizeof(buf), 0);
@@ -74,10 +67,10 @@ private:
         }
 
         if (_threadQueue) {
-            ServerEvent e;
-            e.type = ServerEvent::Type::Disconnected;
-            e.sessionID = _sessionID;
-            _threadQueue->push(std::move(e));
+            ServerEvent event;
+            event.type = ServerEvent::Type::Disconnected;
+            event.sessionID = _sessionID;
+            _threadQueue->push(std::move(event));
         }
     }
 

@@ -136,6 +136,7 @@
     <ClCompile Include="ThirdParty\imgui_widgets.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ClientModel.h" />
     <ClInclude Include="ClientSession.h" />
     <ClInclude Include="ThirdParty\imconfig.h" />
     <ClInclude Include="ThirdParty\imgui.h" />

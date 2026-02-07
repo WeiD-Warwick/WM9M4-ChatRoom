@@ -1,31 +1,58 @@
 #pragma once
 #include "BaseSession.h"
+#include <atomic>
+#include <thread>
 
 class ClientSession : public BaseSession {
 
-    MessageHandler handler;
+public:
+    explicit ClientSession(SOCKET socket)
+        : BaseSession(socket) {
+    }
 
+    ~ClientSession() override {
+        stop();
+    }
+
+    void start() {
+        _running.store(true);
+        _ioThread = std::thread([this] {
+            ioLoop();
+            });
+    }
+
+    void stop() {
+        bool expected = true;
+        if (_running.compare_exchange_strong(expected, false)) {
+            ::shutdown(socket, SD_BOTH);
+            ::closesocket(socket);
+        }
+
+        if (_ioThread.joinable()) {
+            _ioThread.join();
+        }
+    }
+
+private:
     void onMessage(const Message& message) override {
-        std::visit(handler, message.decode());
+        (void)message;
     }
-};
 
-struct MessageHandler {
-    void operator()(const HelloMsg& msg) const {
-        std::cout << ">> [Handle Hello] ChatterName: " << msg.name << std::endl;
+    void ioLoop() {
+        char buf[4096];
+        while (_running.load()) {
+            int bytes = ::recv(socket, buf, (int)sizeof(buf), 0);
+            if (bytes > 0) {
+                handleData(buf, (size_t)bytes);
+            }
+            else {
+                break;
+            }
+        }
     }
-    void operator()(const Chatter& msg) const {
-        std::cout << ">> [Handle Welcome] Welcome, " << msg.chatterName
-            << " (ID: " << msg.chatterID << ")" << std::endl;
-    }
-    void operator()(const GroupChat& msg) const {
-        std::cout << ">> [Group Message] " << msg.sender.chatterName << ": " << msg.content << std::endl;
-    }
-    void operator()(const PrivateChat& msg) const {
-        std::cout << ">> [Private Message] " << msg.sender.chatterName << " -> "
-            << msg.receiver.chatterName << ": " << msg.content << std::endl;
-    }
-    void operator()(const SystemMessage& msg) const {
-        std::cout << ">> [Event] " << msg.user.chatterName << " " << msg.text << std::endl;
-    }
+
+private:
+    std::atomic<bool> _running{ false };
+    std::thread _ioThread;
+
 };
