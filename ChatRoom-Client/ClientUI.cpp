@@ -24,17 +24,21 @@ inline void drawLoginWindow(Client& client, ChatModel& model) {
     if (!model.isConnected) {
         model.openLogin = true;
         ImGui::SetNextWindowSize(ImVec2(420, 200), ImGuiCond_FirstUseEver);
-        ImGui::Begin("ChatRoom Login", &model.openLogin, ImGuiWindowFlags_NoCollapse);
-        ImGui::Text("Name");
-        ImGui::InputText("name", &model.nameBuffer);
+        ImGui::Begin("ChatRoom Login", &model.openLogin, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 
-        if (ImGui::Button("Go!")) {
+        ImGui::Text("Name");
+        ImGui::PushItemWidth(-80.0f);
+        ImGui::InputText("##name_input_field", &model.nameBuffer);
+
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+
+        if (ImGui::Button("Go!", ImVec2(60, 0))) {
             if (model.nameBuffer.empty()) {
                 model.state = ChatModel::LoginType::EmptyName;
             }
             else {
                 model.isConnected = client.start(model.nameBuffer);
-
                 model.openMainChat = true;
                 model.state = model.isConnected ? ChatModel::LoginType::Connected : ChatModel::LoginType::NetError;
             }
@@ -42,7 +46,7 @@ inline void drawLoginWindow(Client& client, ChatModel& model) {
 
         if (model.state != ChatModel::LoginType::Default) {
             ImGui::Spacing();
-            ImGui::Text(model.statusMessage().c_str());
+            ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), model.statusMessage().c_str());
         }
 
         ImGui::End();
@@ -133,7 +137,6 @@ inline void drawOnlineList(Client& client, ChatModel& model) {
     ImGui::EndChild();
     ImGui::PopStyleVar();
 }
-
 
 inline void drawMessageList(std::vector<ChatMsg>& messages, float height) {
     ImGui::BeginChild("MessageList", ImVec2(0, height), ImGuiChildFlags_AlwaysUseWindowPadding | ImGuiChildFlags_Borders);
@@ -239,7 +242,6 @@ inline void drawPrivateInputArea(Client& client, PrivateChatWindow& window, floa
     ImGui::EndChild();
     ImGui::PopStyleVar();
 }
-
 
 inline void drawChatView(Client& client, ChatModel& model) {
     ImGui::BeginChild("MainChatPanel", ImVec2(0, 0), ImGuiChildFlags_None);
