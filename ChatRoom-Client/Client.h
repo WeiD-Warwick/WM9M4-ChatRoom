@@ -292,7 +292,29 @@ private:
             chatMsg.text = systemMessage.text;
             chatMsg.sender = Chatter("default", "System");
             chatMsg.type = ChatMsg::Type::SystemNotice;
-            model.mainChatMessages.push_back(std::move(chatMsg));
+            if (!systemMessage.user.chatterID.empty()) {
+                PrivateChatWindow* targetWindow = nullptr;
+                for (auto& window : model.privateChats) {
+                    if (window.user.chatterID == systemMessage.user.chatterID) {
+                        window.open = true;
+                        targetWindow = &window;
+                        break;
+                    }
+                }
+                if (!targetWindow) {
+                    PrivateChatWindow window{};
+                    window.user = systemMessage.user;
+                    if (window.user.chatterName.empty() || window.user.chatterName == "default") {
+                        window.user.chatterName = window.user.chatterID;
+                    }
+                    model.privateChats.push_back(std::move(window));
+                    targetWindow = &model.privateChats.back();
+                }
+                targetWindow->messages.push_back(std::move(chatMsg));
+            }
+            else {
+                model.mainChatMessages.push_back(std::move(chatMsg));
+            }
             Log(std::format("[Client] System message received. text={}", systemMessage.text));
             break;
         }
