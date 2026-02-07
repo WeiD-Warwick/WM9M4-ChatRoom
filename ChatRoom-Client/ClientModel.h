@@ -64,6 +64,7 @@ public:
     bool openLogin = false;
     bool openMainChat = false;
     bool openPrivateChat = false;
+    bool allowLoginWindow = true;
 
     std::vector<PrivateChatWindow> privateChats;
 

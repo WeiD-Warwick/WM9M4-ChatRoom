@@ -21,8 +21,10 @@ inline void drawLoginWindow(Client& client, ChatModel& model) {
         model.state = ChatModel::LoginType::Disconnected;
     }
 
-    if (!model.isConnected) {
-        model.openLogin = true;
+    if (!model.isConnected && model.allowLoginWindow) {
+        if (!model.openLogin) {
+            model.openLogin = true;
+        }
         ImGui::SetNextWindowSize(ImVec2(420, 200), ImGuiCond_FirstUseEver);
         ImGui::Begin("ChatRoom Login", &model.openLogin, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 
@@ -46,7 +48,7 @@ inline void drawLoginWindow(Client& client, ChatModel& model) {
 
         if (model.state != ChatModel::LoginType::Default) {
             ImGui::Spacing();
-            ImGui::TextColored(ImVec4(1.0f, 0.4f, 0.4f, 1.0f), model.statusMessage().c_str());
+            ImGui::Text(model.statusMessage().c_str());
         }
 
         ImGui::End();
@@ -62,6 +64,7 @@ inline void drawChatRoomWindow(Client& client, ChatModel& model) {
     const float sendBtnW = 80.0f;
     const float inputH = ImGui::GetFrameHeight() + ImGui::GetStyle().WindowPadding.y * 2.0f;
     const float listH = ImGui::GetContentRegionAvail().y - inputH;
+    const bool wasOpen = model.openMainChat;
 
     ImGui::Begin("ChatRoom", &model.openMainChat, ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize);
 
@@ -72,6 +75,19 @@ inline void drawChatRoomWindow(Client& client, ChatModel& model) {
     drawChatView(client, model);
 
     ImGui::End();
+
+    if (wasOpen && !model.openMainChat) {
+        client.stop();
+        model.isConnected = false;
+        model.state = ChatModel::LoginType::Disconnected;
+        model.openPrivateChat = false;
+        model.openLogin = false;
+        model.allowLoginWindow = false;
+        for (auto& chat : model.privateChats) {
+            chat.open = false;
+        }
+        model.removeClosedPrivateChats();
+    }
 }
 
 inline void drawPrivateChatWindow(Client& client, ChatModel& model) {
