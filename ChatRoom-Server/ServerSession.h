@@ -28,7 +28,7 @@ public:
         _running.store(true);
 
         _ioThread = std::thread([this] { 
-            Log(std::format("{:<{}} threadid: {}. sid: {} start a new io thread.", "[IO Thread]", tag_w, GetCurrentThreadId(), _sessionID));
+            Log(std::format("{:<{}} tid: {}. sid: {} start a new io thread.", "[IO Thread]", tag_w, GetCurrentThreadId(), _sessionID));
             ioLoop();
             }
         );

@@ -9,7 +9,6 @@
 #include <mutex>
 #include <iostream>
 
-#pragma comment(lib, "ws2_32.lib")
 
 const int uid_length = 11;
 const int tag_w = 16;
